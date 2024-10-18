@@ -1,6 +1,8 @@
 package cz.wz.marysidy;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +14,7 @@ public class Booking {
     private VacationType vacationType;
 
     // Constructor
-    private Booking(Room room, LocalDate arrivalDate, LocalDate checkOutDate, VacationType vacationType) {
+    public Booking(Room room, LocalDate arrivalDate, LocalDate checkOutDate, VacationType vacationType) {
         this.room = room;
         this.arrivalDate = arrivalDate;
         this.checkOutDate = checkOutDate;
@@ -20,7 +22,7 @@ public class Booking {
     }
 
     // Constructor from today till 6 days
-    private Booking(Room room){
+    public Booking(Room room){
         this(room, LocalDate.now(), LocalDate.now().plusDays(6), VacationType.LEASURE);
     }
 
@@ -72,47 +74,28 @@ public class Booking {
         this.checkOutDate = checkOutDate;
     }
 
+    public int getBookingLength() {
+        return arrivalDate.until(checkOutDate).getDays();
+    }
+
+    // 10. Cena rezervace
+    public BigDecimal getTotalPrice() {
+        return room.getPriceKcPerNight().multiply(BigDecimal.valueOf(getBookingLength()));
+    }
+
+    public String getFormattedSummary() {
+        return  getArrivalDate() +" až "+ getCheckOutDate()+": " + getGuests().get(0).getName() +" " + getGuests().get(0).getSurname() +
+                " ("+ getGuests().get(0).getBirth().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))+")["+
+                getGuests().size() + ", " + (getRoom().isSeaView()?"ano":"ne")+"] za " + getTotalPrice() + " EUR";
+    }
+
     @Override
     public String toString() {
-        return "Booking{" +
-                "guests=" + guests +
-                ", arrivalDate=" + arrivalDate +
-                ", checkOutDate=" + checkOutDate +
-                ", room=" + room +
-                ", vacationType='" + vacationType + '\'' +
-                '}';
-    }
-
-    // Booking methods
-    public static Booking makeBooking(List<Guest> guests, Room room, LocalDate arrivalDate, LocalDate checkOutDate, VacationType vacationType){
-        if (room.isAvailable(arrivalDate, checkOutDate)) {
-            Booking newBooking = new Booking(room, arrivalDate, checkOutDate, vacationType);
-            newBooking.addGuests(guests);
-            room.addBooking(newBooking); // Adding booking to the room
-            System.out.println("Successful reservation " + arrivalDate + " - " + checkOutDate);
-            return newBooking;
-        } else {
-            System.out.println("Room is not available for the selected dates.");
-            return null;
-        }
-    }
-
-    public static Booking makeBooking(Guest guest, Room room, LocalDate arrivalDate, LocalDate checkOutDate, VacationType vacationType) {
-        List<Guest> guestList = new ArrayList<>();
-        guestList.add(guest);
-        // calling another method makeBooking, which takes list of guest
-        return makeBooking(guestList, room, arrivalDate, checkOutDate, vacationType);
-    }
-
-    // aby se při vytváření rezervace rezervovalo automaticky na rekreační pobyt od dneška na dalších 6 nocí
-    public static Booking makeBooking(List<Guest> guests, Room room){
-        return makeBooking(guests, room, LocalDate.now(), LocalDate.now().plusDays(6), VacationType.LEASURE);
-    }
-
-    public static Booking makeBooking(Guest guest, Room room) {
-        List<Guest> guestList = new ArrayList<>();
-        guestList.add(guest);
-        return makeBooking(guestList, room);
+        Guest guest = guests.get(0);
+        return "Rezervace pro: " + guest.getName() + " " + guest.getSurname() + " (" + guest.getBirth() + ") na: "
+                + getBookingLength() + (getBookingLength() == 1? " noc" : getBookingLength() > 4? " nocí":" noce") +
+                ", termín: " + getArrivalDate() + " - " + getCheckOutDate() +
+                " pracovní pobyt: " + (vacationType.equals(VacationType.WORK)? "ano":"ne");
     }
 
 }

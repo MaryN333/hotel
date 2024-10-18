@@ -1,9 +1,6 @@
 package cz.wz.marysidy;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Room {
     private int roomNumber;
@@ -11,8 +8,6 @@ public class Room {
     private boolean isBalcony;
     private boolean isSeaView;
     private BigDecimal priceKcPerNight;
-    private List<Booking> bookings = new ArrayList<>();
-
 
     public Room(int roomNumber, int bedsNumber, boolean isBalcony, boolean isSeaView, BigDecimal price) {
         this.roomNumber = roomNumber;
@@ -60,27 +55,6 @@ public class Room {
 
     public void setPriceKcPerNight(BigDecimal priceKcPerNight) {
         this.priceKcPerNight = priceKcPerNight;
-    }
-
-    public List<Booking> getBookings() {
-        return bookings;
-    }
-
-    public void addBooking(Booking booking) {
-        bookings.add(booking);
-    }
-
-    // Check if the room is available for the given date range
-    public boolean isAvailable(LocalDate arrivalDate, LocalDate checkOutDate) {
-        for (Booking booking : bookings) {
-            // Check if the new booking dates overlap with any existing bookings
-            if (!(arrivalDate.isAfter(booking.getCheckOutDate()) || checkOutDate.isBefore(booking.getArrivalDate()))) {
-                // If the dates overlap, the room is not available
-                return false;
-            }
-        }
-        // If no overlapping bookings, the room is available
-        return true;
     }
 
     @Override

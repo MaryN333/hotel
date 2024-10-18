@@ -15,6 +15,17 @@ public class Main {
         }
     }
 
+    // Method for creation of several reservations
+    public static void createShortStays(int qty, BookingManager bookings, Guest karolina, Room room) {
+        for (int i = 0; i < qty; i++) {
+            LocalDate startDate = LocalDate.of(2023, 8, 1).plusDays(i * 2);
+            LocalDate endDate = startDate.plusDays(1);
+            List<Guest> guests = new ArrayList<>();
+            guests.add(karolina);
+            bookings.makeBooking(guests, room, startDate, endDate, VacationType.LEASURE);
+        }
+    }
+
     public static void main(String[] args) {
         Guest g1 = new Guest("Adela", "Malikova", LocalDate.of(1993, 3, 13));
         Guest g2 = new Guest("Jan", "Dvoracek", LocalDate.of(1995, 5, 5));
@@ -40,44 +51,55 @@ public class Main {
         printInfo(rooms);
 
         System.out.println("*-".repeat(15));
-        Booking b1 = Booking.makeBooking(g1, r1, LocalDate.of(2021, 7, 19), LocalDate.of(2021, 7, 26), VacationType.WORK);
+        BookingManager bookings = new BookingManager();
+        Booking b1 = bookings.makeBooking(g1, r1, LocalDate.of(2021, 7, 19), LocalDate.of(2021, 7, 26), VacationType.WORK);
         b1.addGuest(g2);
 //        List<Guest> guestList = Arrays.asList(g1, g2);
-        Booking b2 = Booking.makeBooking(Arrays.asList(g1,g2), r1, LocalDate.of(2021, 9, 1), LocalDate.of(2021, 9, 14), VacationType.WORK);
+        Booking b2 = bookings.makeBooking(Arrays.asList(g1,g2), r1, LocalDate.of(2021, 9, 1), LocalDate.of(2021, 9, 14), VacationType.WORK);
 //        // b3 - Room is not available for the selected dates.
-        Booking b3 = Booking.makeBooking(g2, r1, LocalDate.of(2021, 7, 25), LocalDate.of(2021, 7, 26), VacationType.WORK);
-        Booking b4 = Booking.makeBooking(g1, r3, LocalDate.of(2024, 11, 24), LocalDate.of(2024, 11, 30), VacationType.LEASURE);
-        Booking b5 = Booking.makeBooking(Arrays.asList(g1, g2), r2);
+        Booking b3 = bookings.makeBooking(g2, r1, LocalDate.of(2021, 7, 25), LocalDate.of(2021, 7, 26), VacationType.WORK);
+        Booking b4 = bookings.makeBooking(g1, r3, LocalDate.of(2024, 11, 24), LocalDate.of(2024, 11, 30), VacationType.LEASURE);
+        Booking b5 = bookings.makeBooking(Arrays.asList(g1, g2), r2);
 
+
+        bookings.printInfo();
         System.out.println("-*".repeat(20));
-        List<Booking> bookings = new ArrayList<>();
-        bookings.add(b1);
-        bookings.add(b2);
-        bookings.add(b3);
-        bookings.add(b4);
-        bookings.add(b5);
-        System.out.println(bookings);
+        Booking some = bookings.getBooking(1);
+        System.out.println(some);
+        System.out.println("-*".repeat(20));
+
+        printInfo(bookings.getBookings());
+        System.out.println("-*".repeat(20));
 
 
+        // Second part
+        bookings.clearBookings();
 
-//        BookingManager bookings = new BookingManager();
-//        bookings.addBooking(b1);
-//        bookings.addBooking(b2);
-//        bookings.addBooking(b3);
-//        bookings.addBooking(b4);
-//        bookings.addBooking(b5);
-//
-//        bookings.printInfo();
-//
-//
-//        System.out.println("*-".repeat(15));
-//        Booking some = bookings.getBooking(0);
-//        System.out.println(some);
+        Guest karolina = new Guest("Karolína", "Tmavá", LocalDate.of(2000,1,3));
+        Guest karel = new Guest("Karel", "Dvořák", LocalDate.of(1990,5,15));
+
+        bookings.makeBooking(karel, r3, LocalDate.of(2023, 6, 1), LocalDate.of(2023,6, 7), VacationType.WORK);
+        bookings.makeBooking(new Guest("Karel", "Dvořák", LocalDate.of(1979,1,3)), r2, LocalDate.of(2023, 7, 18), LocalDate.of(2023,7, 21), VacationType.LEASURE);
+        bookings.makeBooking(Arrays.asList(karolina, karel), r3, LocalDate.of(2023, 8, 1), LocalDate.of(2023,8, 31), VacationType.WORK);
+        createShortStays(10, bookings, karolina, r2);
+        bookings.printInfo();
+
+        System.out.println("Celkový počet rezervací je " + bookings.getBookings().size());      // 13
+
+        System.out.println("Průměrný počet hostů na rezervaci: " + bookings.getAverageGuests()); // 1.0769230769230769
+
+        List<Booking> list = bookings.getTopNHolidayBookings(8);
+        bookings.printInfo(list);
+
+        System.out.println("Statistiky hostů:");
+        bookings.countPeopleInReservations();
+
+        System.out.println("Počet pracovních pobytů: " + bookings.getNumberOfWorkingBookings());      // 2
 
 
-
-
-
-
+        for(Booking booking : bookings.getBookings()){
+            System.out.println(booking.getFormattedSummary());
+        }
+//        System.out.println(b1.getVacationType());         // pracovní
     }
 }
